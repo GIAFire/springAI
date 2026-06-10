@@ -1,0 +1,40 @@
+server:
+    port: 8080
+spring:
+    application:
+        name: springAI
+    ai:
+        openai:
+            api-key: ${OPENAI_API_KEY2}
+#            base-url: https://api.deepseek.com
+            base-url: https://api.modelarts-maas.com/openai/v1
+            chat:
+                api-key: ${OPENAI_API_KEY2}
+#                base-url: https://api.deepseek.com
+#                completions-path: /v1/chat/completions
+#                options:
+#                    model: deepseek-v4-flash
+                base-url: https://api.modelarts-maas.com/openai
+                completions-path: /v1/chat/completions
+                options:
+                    model: glm-5
+
+            embedding:
+                api-key: ${OPENAI_API_KEY2}
+                base-url: https://api.modelarts-maas.com/v1/embeddings
+                options:
+                    model: bge-m3
+                    dimensions: 1024
+        vectorstore:
+            milvus:
+                client:
+                    host: localhost
+                    port: 19530
+                    username: root
+                    password: milvus
+                database-name: default
+                collection-name: test_agent_docs
+                initialize-schema: true
+                embedding-dimension: 1024
+                index-type: IVF_FLAT
+                metric-type: COSINE
