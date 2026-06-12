@@ -6,8 +6,8 @@ spring:
   cloud:
     nacos:
       discovery:
-#        server-addr: 127.0.0.1:8848   # Nacos 注册中心地址
-        server-addr: 172.28.127.10:8848   # Nacos 注册中心地址
+        server-addr: 127.0.0.1:8848   # Nacos 注册中心地址
+#        server-addr: 172.28.127.10:8848   # Nacos 注册中心地址
       config:
         import-check:
           enabled: false
@@ -53,10 +53,10 @@ spring:
   ai:
     openai:
       chat:
-        api-key: ${OPENAI_API_KEY}
-        base-url: https://api.deepseek.com
+        api-key: ${OPENAI_API_KEY2}
+        base-url: ${OPENAI_BASE_URL2}
         options:
-          model: deepseek-v4-flash
+          model: glm-5
     vectorstore:
       milvus:
         client:
