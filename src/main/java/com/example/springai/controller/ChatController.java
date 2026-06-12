@@ -1,6 +1,7 @@
 package com.example.springai.controller;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,13 +13,8 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/chat")
 public class ChatController {
 
-    private final ChatClient chatClient;
-
-    public ChatController(ChatClient.Builder builder) {
-        this.chatClient = builder
-                .defaultSystem("你是一个 Java Spring AI Agent 助手，回答要简洁、准确。")
-                .build();
-    }
+    @Autowired
+    private ChatClient chatClient;
 
     @GetMapping("/chat")
     public String chat(@RequestParam String msg) {
