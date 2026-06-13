@@ -12,6 +12,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.context.annotation.Configuration;
@@ -25,31 +26,31 @@ import java.util.stream.Collectors;
 @Configuration
 public class ChatClientConfig {
 
-    private ChatClient baseAgentBuilder(ChatClient.Builder builder) {
+    private ChatClient.Builder baseAgentBuilder(ChatClient.Builder builder) {
         // 设置上下文最大记录
         MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
-        return builder
+        return builder.clone()
                 // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build())
-                .build();
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build());
     }
 
     @Bean
     public ChatClient userAgentClient(ChatClient.Builder builder,
-                                       MallAdminUserTools mallAdminUserTools) {
+                                      MallAdminUserTools mallAdminUserTools,
+                                      ToolSearchAdvisorFactory toolSearchAdvisorFactory,
+                                      @Value("${app.ai.agents.user.tool-set-id:user-agent-tools}") String toolSetId) {
 
         // 从baseAgentBuilder中获取基础配置
         ChatClient agent = baseAgentBuilder(builder)
-                // 复制基础配置
-                .mutate()
                 // 重要 默认关键词,可根据业务进行读取配置文件变量定义模板
                 .defaultSystem("你是一个userAgent")
                 // 重要 适合固定功能性智能体,在用户提问时,额外补充内容,相当于帮用户补充、优化提问内容
                 .defaultUser(user -> user
                         .text("{level}")
                         .param("level", ""))
-                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(loggerAdvisor)
+                // 每个 Agent 挂自己的 ToolSearchAdvisor，并传入独立 toolSetId。
+                // userAgent 只能从 user-agent-tools 这套工具索引里检索工具。
+                .defaultAdvisors(toolSearchAdvisorFactory.create(toolSetId), loggerAdvisor)
                 // 设置模型参数
                 .defaultOptions(ChatOptions.builder()
                         // 小稳定,大热情
@@ -66,20 +67,21 @@ public class ChatClientConfig {
 
     @Bean
     public ChatClient orderAgentClient(ChatClient.Builder builder,
-                                      MallAdminRoleTools mallAdminRoleTools) {
+                                      MallAdminRoleTools mallAdminRoleTools,
+                                      ToolSearchAdvisorFactory toolSearchAdvisorFactory,
+                                      @Value("${app.ai.agents.order.tool-set-id:order-agent-tools}") String toolSetId) {
 
         // 从baseAgentBuilder中获取基础配置
         ChatClient agent = baseAgentBuilder(builder)
-                // 复制基础配置
-                .mutate()
                 // 重要 默认关键词,可根据业务进行读取配置文件变量定义模板
                 .defaultSystem("你是一个orderAgent")
                 // 重要 适合固定功能性智能体,在用户提问时,额外补充内容,相当于帮用户补充、优化提问内容
                 .defaultUser(user -> user
                         .text("{level}")
                         .param("level", ""))
-                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(loggerAdvisor)
+                // 每个 Agent 挂自己的 ToolSearchAdvisor，并传入独立 toolSetId。
+                // 这里暂时使用 MallAdminRoleTools 演示隔离；后续换成订单工具即可。
+                .defaultAdvisors(toolSearchAdvisorFactory.create(toolSetId), loggerAdvisor)
                 // 设置模型参数
                 .defaultOptions(ChatOptions.builder()
                         // 小稳定,大热情

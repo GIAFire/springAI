@@ -1,6 +1,5 @@
 package com.example.springai.chat;
 
-import com.example.springai.tools.MallAdminRoleTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +19,16 @@ public class ChatController {
     @Autowired
     @Qualifier("userAgentClient")
     private ChatClient userAgentClient;
+    @Autowired
     @Qualifier("orderAgentClient")
     private ChatClient orderAgentClient;
-    @Autowired
-    private MallAdminRoleTools mallAdminRoleTools;
 
     @GetMapping("/chat")
-    public String chat(@RequestParam String conversationId,@RequestParam String msg) {
-        return userAgentClient.prompt()
+    public String chat(@RequestParam String conversationId,
+                       @RequestParam String msg,
+                       @RequestParam(defaultValue = "user") String agent) {
+        ChatClient agentClient = "order".equalsIgnoreCase(agent) ? orderAgentClient : userAgentClient;
+        return agentClient.prompt()
                 .user(msg)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()

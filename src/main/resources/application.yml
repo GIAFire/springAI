@@ -54,13 +54,14 @@ spring:
     chat:
       client:
         tool-search-advisor:
-          enabled: true
+          # 关闭官方全局自动注入，改为在每个 Agent 上手动挂载自己的 ToolSearchAdvisor。
+          enabled: false
           tool-index-type: vector
           max-results: 2
           # 工具检索专用 Milvus collection，不和业务知识库 test_agent_docs 混用。
+          # 多个 Agent 可以共用这个 collection，但必须使用不同 toolSetId 做 metadata 隔离。
           milvus:
             collection-name: tool_data
-            tool-id: tool_id
     openai:
       chat:
         api-key: ${OPENAI_API_KEY2}
@@ -110,3 +111,13 @@ logging:
     org.springframework.ai.chat.client.advisor: DEBUG
     org.springframework.ai: DEBUG
     com.openai: DEBUG
+
+app:
+  ai:
+    agents:
+      user:
+        # 用户智能体的工具索引隔离 ID，只索引和检索用户相关工具。
+        tool-set-id: user-agent-tools
+      order:
+        # 订单智能体的工具索引隔离 ID，只索引和检索订单相关工具。
+        tool-set-id: order-agent-tools
