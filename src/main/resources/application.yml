@@ -57,6 +57,7 @@ spring:
         base-url: ${OPENAI_BASE_URL2}
         options:
           model: glm-5
+#          model: deepseek-v4-pro
     vectorstore:
       milvus:
         client:
