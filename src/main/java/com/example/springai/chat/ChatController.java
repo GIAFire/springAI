@@ -2,9 +2,9 @@ package com.example.springai.chat;
 
 import com.example.springai.tools.MallAdminRoleTools;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -12,20 +12,22 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.function.Consumer;
 
 @RestController
 @RequestMapping("/chat")
 public class ChatController {
 
     @Autowired
-    private ChatClient chatClient;
+    @Qualifier("userAgentClient")
+    private ChatClient userAgentClient;
+    @Qualifier("orderAgentClient")
+    private ChatClient orderAgentClient;
     @Autowired
     private MallAdminRoleTools mallAdminRoleTools;
 
     @GetMapping("/chat")
     public String chat(@RequestParam String conversationId,@RequestParam String msg) {
-        return chatClient.prompt()
+        return userAgentClient.prompt()
                 .user(msg)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
@@ -34,7 +36,7 @@ public class ChatController {
 
     @GetMapping(value = "/streamChat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> streamChat(@RequestParam String msg) {
-        return chatClient.prompt()
+        return userAgentClient.prompt()
                 .user(msg)
                 .stream()
                 .content();
@@ -44,7 +46,7 @@ public class ChatController {
     public SseEmitter chatSseEmitter(@RequestParam String conversationId, @RequestParam String msg) {
         SseEmitter emitter = new SseEmitter(0L);
 
-        chatClient.prompt("")
+        userAgentClient.prompt("")
                 .user(msg)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .stream()

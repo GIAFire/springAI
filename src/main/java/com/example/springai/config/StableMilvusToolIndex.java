@@ -45,7 +45,7 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
 
     private static final Log logger = LogFactory.getLog(StableMilvusToolIndex.class);
 
-    private static final String METADATA_TOOL_SET_ID = "toolSetId";
+    private static final String METADATA_TOOL_ID = "toolId";
 
     private static final String METADATA_TOOL_NAME = "toolName";
 
@@ -69,7 +69,7 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
 
     private final String metadataFieldName;
 
-    private final String toolSetId;
+    private final String toolId;
 
     private final Map<String, String> storedDescriptionHashes = new HashMap<>();
 
@@ -77,14 +77,14 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
 
     public StableMilvusToolIndex(VectorStore vectorStore, MilvusServiceClient milvusClient, String databaseName,
                                  String collectionName, String idFieldName, String metadataFieldName,
-                                 String toolSetId) {
+                                 String toolId) {
         this.vectorStore = Objects.requireNonNull(vectorStore, "vectorStore must not be null");
         this.milvusClient = Objects.requireNonNull(milvusClient, "milvusClient must not be null");
         this.databaseName = Objects.requireNonNull(databaseName, "databaseName must not be null");
         this.collectionName = Objects.requireNonNull(collectionName, "collectionName must not be null");
         this.idFieldName = Objects.requireNonNull(idFieldName, "idFieldName must not be null");
         this.metadataFieldName = Objects.requireNonNull(metadataFieldName, "metadataFieldName must not be null");
-        this.toolSetId = Objects.requireNonNull(toolSetId, "toolSetId must not be null");
+        this.toolId = Objects.requireNonNull(toolId, "toolId must not be null");
     }
 
     @Override
@@ -125,8 +125,8 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
                     .id(documentId)
                     .text(toolReference.summary())
                     .metadata(Map.of(
-                            // toolSetId 用于隔离不同 Agent 的工具集，即使共用 collection 也不会互相检索到。
-                            METADATA_TOOL_SET_ID, toolSetId,
+                            // toolId 用于隔离不同 Agent 的工具集，即使共用 collection 也不会互相检索到。
+                            METADATA_TOOL_ID, toolId,
                             METADATA_TOOL_NAME, toolReference.toolName(),
                             METADATA_TOOL_DESCRIPTION, toolReference.summary(),
                             METADATA_DESCRIPTION_HASH, descriptionHash
@@ -154,8 +154,8 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
         }
 
         if (logger.isInfoEnabled() && (!changedDocumentIds.isEmpty() || !staleDocumentIds.isEmpty())) {
-            logger.info("Tool index synchronized: upserted=%d, removed=%d, toolSetId=%s"
-                    .formatted(changedDocumentIds.size(), staleDocumentIds.size(), toolSetId));
+            logger.info("Tool index synchronized: upserted=%d, removed=%d, toolId=%s"
+                    .formatted(changedDocumentIds.size(), staleDocumentIds.size(), toolId));
         }
     }
 
@@ -165,10 +165,10 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
         int maxResults = request.maxResults() != null ? request.maxResults() : DEFAULT_MAX_RESULTS;
 
         var filter = new FilterExpressionBuilder()
-                .eq(METADATA_TOOL_SET_ID, toolSetId)
+                .eq(METADATA_TOOL_ID, toolId)
                 .build();
 
-        // 即使 collection 中存了多个 Agent 的工具，也只检索当前 toolSetId 下的工具。
+        // 即使 collection 中存了多个 Agent 的工具，也只检索当前 toolId 下的工具。
         List<Document> documents = vectorStore.similaritySearch(SearchRequest.builder()
                 .query(request.query())
                 .topK(maxResults)
@@ -228,7 +228,7 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
             String documentId = Objects.toString(row.get(idFieldName), "");
             Object metadata = row.get(metadataFieldName);
 
-            if (!toolSetId.equals(metadataValue(metadata, METADATA_TOOL_SET_ID))) {
+            if (!toolId.equals(metadataValue(metadata, METADATA_TOOL_ID))) {
                 continue;
             }
 
@@ -255,7 +255,7 @@ public class StableMilvusToolIndex implements ToolIndex, Closeable {
 
     private String documentId(String toolName) {
         // Milvus VectorStore 创建的主键是最大长度 36 的 VarChar，所以使用基于名称生成的 UUID。
-        return UUID.nameUUIDFromBytes((toolSetId + ":" + toolName).getBytes(StandardCharsets.UTF_8)).toString();
+        return UUID.nameUUIDFromBytes((toolId + ":" + toolName).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     private String descriptionHash(ToolReference toolReference) {

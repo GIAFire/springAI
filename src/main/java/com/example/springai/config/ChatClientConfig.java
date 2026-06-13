@@ -25,24 +25,86 @@ import java.util.stream.Collectors;
 @Configuration
 public class ChatClientConfig {
 
-    @Bean
-    public ChatClient chatClient(ChatClient.Builder builder,
-                                 MallAdminUserTools mallAdminUserTools,
-                                 MallAdminRoleTools mallAdminRoleTools) {
+    private ChatClient baseAgentBuilder(ChatClient.Builder builder) {
         // 设置上下文最大记录
         MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
-        // 打印上下文
-        var loggerAdvisor = new SimpleLoggerAdvisor(
-                request -> {
-                    var prompt = request.prompt();
+        return builder
+                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build())
+                .build();
+    }
 
-                    String messages = prompt.getInstructions().stream()
-                            .map(ChatClientConfig::formatMessage)
-                            .collect(Collectors.joining("\n\n"));
+    @Bean
+    public ChatClient userAgentClient(ChatClient.Builder builder,
+                                       MallAdminUserTools mallAdminUserTools) {
 
-                    String tools = formatTools(prompt.getOptions());
+        // 从baseAgentBuilder中获取基础配置
+        ChatClient agent = baseAgentBuilder(builder)
+                // 复制基础配置
+                .mutate()
+                // 重要 默认关键词,可根据业务进行读取配置文件变量定义模板
+                .defaultSystem("你是一个userAgent")
+                // 重要 适合固定功能性智能体,在用户提问时,额外补充内容,相当于帮用户补充、优化提问内容
+                .defaultUser(user -> user
+                        .text("{level}")
+                        .param("level", ""))
+                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
+                .defaultAdvisors(loggerAdvisor)
+                // 设置模型参数
+                .defaultOptions(ChatOptions.builder()
+                        // 小稳定,大热情
+                        .temperature(0.9))
+                // 重要 设置默认工具
+                .defaultTools(mallAdminUserTools)
+                // 用于给工具传默认参数
+                .defaultToolContext(Map.of(
+                        "tenantId", "00001"
+                )).build();
 
-                    return """
+        return agent;
+    }
+
+    @Bean
+    public ChatClient orderAgentClient(ChatClient.Builder builder,
+                                      MallAdminRoleTools mallAdminRoleTools) {
+
+        // 从baseAgentBuilder中获取基础配置
+        ChatClient agent = baseAgentBuilder(builder)
+                // 复制基础配置
+                .mutate()
+                // 重要 默认关键词,可根据业务进行读取配置文件变量定义模板
+                .defaultSystem("你是一个orderAgent")
+                // 重要 适合固定功能性智能体,在用户提问时,额外补充内容,相当于帮用户补充、优化提问内容
+                .defaultUser(user -> user
+                        .text("{level}")
+                        .param("level", ""))
+                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
+                .defaultAdvisors(loggerAdvisor)
+                // 设置模型参数
+                .defaultOptions(ChatOptions.builder()
+                        // 小稳定,大热情
+                        .temperature(0.1))
+                // 重要 设置默认工具
+                .defaultTools(mallAdminRoleTools)
+                // 用于给工具传默认参数
+                .defaultToolContext(Map.of(
+                        "tenantId", "00001"
+                )).build();
+
+        return agent;
+    }
+
+    private SimpleLoggerAdvisor loggerAdvisor = new SimpleLoggerAdvisor(
+            request -> {
+                var prompt = request.prompt();
+
+                String messages = prompt.getInstructions().stream()
+                        .map(ChatClientConfig::formatMessage)
+                        .collect(Collectors.joining("\n\n"));
+
+                String tools = formatTools(prompt.getOptions());
+
+                return """
                         ========= Spring AI Request =========
                         OPTIONS:
                         %s
@@ -54,42 +116,18 @@ public class ChatClientConfig {
                         %s
                         =====================================
                         """.formatted(
-                            formatOptions(prompt.getOptions()),
-                            messages,
-                            tools
-                    );
-                },
-                response -> """
+                        formatOptions(prompt.getOptions()),
+                        messages,
+                        tools
+                );
+            },
+            response -> """
                     ========= Spring AI Response =========
                     %s
                     ======================================
                     """.formatted(response),
-                Ordered.LOWEST_PRECEDENCE - 100
-        );
-        return builder
-                // 重要 默认关键词,可根据业务进行读取配置文件变量定义模板
-                .defaultSystem("你是一个Agent")
-                // 重要 适合固定功能性智能体,在用户提问时,额外补充内容,相当于帮用户补充、优化提问内容
-                .defaultUser(user -> user
-                        .text("{level}")
-                        .param("level", ""))
-                // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build(),
-                        loggerAdvisor)
-                // 设置模型参数
-                .defaultOptions(ChatOptions.builder()
-                        // 小稳定,大热情
-                        .temperature(0.8))
-                // 重要 设置默认工具
-                .defaultTools(mallAdminUserTools,mallAdminRoleTools)
-                // 用于给工具传默认参数
-                .defaultToolContext(Map.of(
-                        "tenantId", "t001",
-                        "system", "mall",
-                        "env", "prod"
-                ))
-                .build();
-    }
+            Ordered.LOWEST_PRECEDENCE - 100
+    );
 
 
     private static String formatMessage(Message message) {

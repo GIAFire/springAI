@@ -26,7 +26,7 @@ public class ToolSearchAdvisorConfig {
                                BatchingStrategy batchingStrategy,
                                MilvusVectorStoreProperties milvusProperties,
                                @Value("${spring.ai.chat.client.tool-search-advisor.milvus.collection-name:tool_data}") String toolCollectionName,
-                               @Value("${spring.ai.chat.client.tool-search-advisor.milvus.tool-set-id:default}") String toolSetId) {
+                               @Value("${spring.ai.chat.client.tool-search-advisor.milvus.tool-id:default}") String toolId) {
         // 工具检索和业务知识库使用不同 collection，避免 RAG 检索到工具说明文本。
         // 这里不额外注册 VectorStore Bean，防止影响业务侧默认 VectorStore 自动装配。
         MilvusVectorStore toolVectorStore = MilvusVectorStore.builder(milvusClient, embeddingModel)
@@ -60,7 +60,7 @@ public class ToolSearchAdvisorConfig {
                 toolCollectionName,
                 milvusProperties.getIdFieldName(),
                 milvusProperties.getMetadataFieldName(),
-                toolSetId);
+                toolId);
     }
 
     @Bean

@@ -60,7 +60,7 @@ spring:
           # 工具检索专用 Milvus collection，不和业务知识库 test_agent_docs 混用。
           milvus:
             collection-name: tool_data
-            tool-set-id: tool_id
+            tool-id: tool_id
     openai:
       chat:
         api-key: ${OPENAI_API_KEY2}
