@@ -27,7 +27,6 @@ public class ChatController {
     public String chat(@RequestParam String conversationId,@RequestParam String msg) {
         return chatClient.prompt()
                 .user(msg)
-                .tools(mallAdminRoleTools)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
                 .content();

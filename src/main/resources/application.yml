@@ -51,6 +51,16 @@ spring:
           #   username: root
           #   password: root
   ai:
+    chat:
+      client:
+        tool-search-advisor:
+          enabled: true
+          tool-index-type: vector
+          max-results: 2
+          # 工具检索专用 Milvus collection，不和业务知识库 test_agent_docs 混用。
+          milvus:
+            collection-name: tool_data
+            tool-set-id: tool_id
     openai:
       chat:
         api-key: ${OPENAI_API_KEY2}
@@ -58,6 +68,11 @@ spring:
         options:
           model: glm-5
 #          model: deepseek-v4-pro
+      embedding:
+        api-key: ${OPENAI_API_KEY2}
+        base-url: https://api.modelarts-maas.com/v1
+        options:
+          model: bge-m3
     vectorstore:
       milvus:
         client:
@@ -66,7 +81,7 @@ spring:
           username: root
           password:
         database-name: default
-        collection-name: test_agent_docs
+        collection-name: knowledge
         initialize-schema: true
         embedding-dimension: 1024
         index-type: IVF_FLAT
@@ -92,5 +107,6 @@ feign:
 logging:
   level:
     org.springframework.web.client: DEBUG
+    org.springframework.ai.chat.client.advisor: DEBUG
     org.springframework.ai: DEBUG
     com.openai: DEBUG
