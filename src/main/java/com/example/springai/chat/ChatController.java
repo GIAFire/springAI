@@ -1,5 +1,6 @@
-package com.example.springai.controller;
+package com.example.springai.chat;
 
+import com.example.springai.tools.MallAdminRoleTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -19,11 +20,14 @@ public class ChatController {
 
     @Autowired
     private ChatClient chatClient;
+    @Autowired
+    private MallAdminRoleTools mallAdminRoleTools;
 
     @GetMapping("/chat")
     public String chat(@RequestParam String conversationId,@RequestParam String msg) {
         return chatClient.prompt()
                 .user(msg)
+                .tools(mallAdminRoleTools)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
                 .content();
@@ -43,7 +47,6 @@ public class ChatController {
 
         chatClient.prompt("")
                 .user(msg)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .stream()
                 .content()

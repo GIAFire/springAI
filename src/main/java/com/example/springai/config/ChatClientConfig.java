@@ -1,5 +1,6 @@
 package com.example.springai.config;
 
+import com.example.springai.tools.MallAdminUserTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class ChatClientConfig {
 
     @Bean
-    public ChatClient chatClient(ChatClient.Builder builder) {
+    public ChatClient chatClient(ChatClient.Builder builder, MallAdminUserTools mallAdminUserTools) {
         // 设置上下文最大记录
         MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
         return builder
@@ -31,7 +32,7 @@ public class ChatClientConfig {
                         // 小稳定,大热情
                         .temperature(0.8))
                 // 重要 设置默认工具
-                .defaultTools()
+                .defaultTools(mallAdminUserTools)
                 // 用于给工具传默认参数
                 .defaultToolContext(Map.of(
                         "tenantId", "t001",
