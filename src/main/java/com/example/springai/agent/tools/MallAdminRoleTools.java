@@ -1,4 +1,4 @@
-package com.example.springai.tools;
+package com.example.springai.agent.tools;
 
 import com.example.springai.entity.MallAdminRole;
 import com.example.springai.service.MallAdminRoleService;

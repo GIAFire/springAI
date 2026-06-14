@@ -1,7 +1,7 @@
-package com.example.springai.chat;
+package com.example.springai.agent.controller;
 
-import com.example.springai.rag.DocumentIngestionService;
-import com.example.springai.rag.RagService;
+import com.example.springai.agent.rag.DocumentIngestionService;
+import com.example.springai.agent.rag.RagService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

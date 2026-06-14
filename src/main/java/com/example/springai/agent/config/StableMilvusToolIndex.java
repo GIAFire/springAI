@@ -1,4 +1,4 @@
-package com.example.springai.config;
+package com.example.springai.agent.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

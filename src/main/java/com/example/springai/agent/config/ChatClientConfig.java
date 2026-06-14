@@ -1,7 +1,7 @@
-package com.example.springai.config;
+package com.example.springai.agent.config;
 
-import com.example.springai.tools.MallAdminRoleTools;
-import com.example.springai.tools.MallAdminUserTools;
+import com.example.springai.agent.tools.MallAdminRoleTools;
+import com.example.springai.agent.tools.MallAdminUserTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -50,7 +50,7 @@ public class ChatClientConfig {
                         .param("level", ""))
                 // 每个 Agent 挂自己的 ToolSearchAdvisor，并传入独立 toolSetId。
                 // userAgent 只能从 user-agent-tools 这套工具索引里检索工具。
-                .defaultAdvisors(toolSearchAdvisorFactory.create(toolSetId), loggerAdvisor)
+                .defaultAdvisors(toolSearchAdvisorFactory.create(toolSetId))
                 // 设置模型参数
                 .defaultOptions(ChatOptions.builder()
                         // 小稳定,大热情

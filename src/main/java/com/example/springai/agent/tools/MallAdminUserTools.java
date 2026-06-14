@@ -1,4 +1,4 @@
-package com.example.springai.tools;
+package com.example.springai.agent.tools;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.springai.entity.MallAdminUser;

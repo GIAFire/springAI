@@ -1,4 +1,4 @@
-package com.example.springai.config;
+package com.example.springai.agent.config;
 
 import io.milvus.client.MilvusServiceClient;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
