@@ -49,7 +49,7 @@ public class ChatController {
     public SseEmitter chatSseEmitter(@RequestParam String conversationId, @RequestParam String msg) {
         SseEmitter emitter = new SseEmitter(0L);
 
-        userAgentClient.prompt("")
+        userAgentClient.prompt()
                 .user(msg)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .stream()
