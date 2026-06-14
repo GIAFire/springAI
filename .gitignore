@@ -29,4 +29,6 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+springAI-chat/.vscode/
+springAI-chat/.node_modules/
+springAI-chat/.idea/
