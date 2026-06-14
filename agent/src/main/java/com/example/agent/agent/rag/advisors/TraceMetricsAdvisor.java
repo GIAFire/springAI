@@ -53,18 +53,24 @@ public class TraceMetricsAdvisor implements CallAdvisor, StreamAdvisor {
      * @param chain   顾问责任链，用于继续执行后续的处理逻辑
      * @return AI 聊天客户端响应对象，包含完整的响应数据
      */
-    public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+    public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain chain) {
+
+        String requestId = MDC.get("requestId");
+        String tenantId = MDC.get("tenantId");
+        String userId = MDC.get("userId");
+        String conversationId = MDC.get("conversationId");
+
         /* 生成唯一标识：AI 请求 ID 和分布式追踪 ID */
         String aiRequestId = UUID.randomUUID().toString();
         String traceId = currentTraceId();
 
         /* 从请求中提取模型名称，如果未配置则使用 "unknown" */
-        String requestModel = Optional.ofNullable(request.prompt().getOptions())
+        String requestModel = Optional.ofNullable(chatClientRequest.prompt().getOptions())
                 .map(ChatOptions::getModel)
                 .orElse("unknown");
 
         /* 统计对话消息数量 */
-        int messageCount = request.prompt().getInstructions().size();
+        int messageCount = chatClientRequest.prompt().getInstructions().size();
 
         /* 记录调用开始时间（纳秒精度） */
         long startNs = System.nanoTime();
@@ -72,14 +78,19 @@ public class TraceMetricsAdvisor implements CallAdvisor, StreamAdvisor {
         /* 设置 MDC 上下文并记录请求上下文，确保日志可追踪 */
         try (MDC.MDCCloseable ignored1 = MDC.putCloseable("aiRequestId", aiRequestId);
              MDC.MDCCloseable ignored2 = MDC.putCloseable("traceId", traceId)) {
-            request.context().put("ai.requestId", aiRequestId);
-            request.context().put("ai.traceId", traceId);
+            chatClientRequest.context().put("ai.requestId", aiRequestId);
+            chatClientRequest.context().put("ai.traceId", traceId);
+
+            chatClientRequest.context().put("requestId", requestId);
+            chatClientRequest.context().put("tenantId", tenantId);
+            chatClientRequest.context().put("userId", userId);
+            chatClientRequest.context().put("conversationId", conversationId);
 
             log.info("AI traceMetrics started. aiRequestId={}, traceId={}, model={}, messageCount={}",
                     aiRequestId, traceId, requestModel, messageCount);
 
             /* 执行后续的advisor链和实际的 AI 调用 */
-            ChatClientResponse response = chain.nextCall(request);
+            ChatClientResponse response = chain.nextCall(chatClientRequest);
 
             /* 计算调用耗时 */
             Duration cost = Duration.ofNanos(System.nanoTime() - startNs);
@@ -162,6 +173,12 @@ public class TraceMetricsAdvisor implements CallAdvisor, StreamAdvisor {
      */
     @Override
     public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain streamAdvisorChain) {
+
+        String requestId = MDC.get("requestId");
+        String tenantId = MDC.get("tenantId");
+        String userId = MDC.get("userId");
+        String conversationId = MDC.get("conversationId");
+
         /* 生成唯一标识：AI 请求 ID 和分布式追踪 ID */
         String aiRequestId = UUID.randomUUID().toString();
         String traceId = currentTraceId();
@@ -182,6 +199,11 @@ public class TraceMetricsAdvisor implements CallAdvisor, StreamAdvisor {
              MDC.MDCCloseable ignored2 = MDC.putCloseable("traceId", traceId)) {
             chatClientRequest.context().put("ai.requestId", aiRequestId);
             chatClientRequest.context().put("ai.traceId", traceId);
+
+            chatClientRequest.context().put("requestId", requestId);
+            chatClientRequest.context().put("tenantId", tenantId);
+            chatClientRequest.context().put("userId", userId);
+            chatClientRequest.context().put("conversationId", conversationId);
 
             log.info("AI traceMetrics stream started. aiRequestId={}, traceId={}, model={}, messageCount={}",
                     aiRequestId, traceId, requestModel, messageCount);

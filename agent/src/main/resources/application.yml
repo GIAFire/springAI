@@ -113,6 +113,8 @@ feign:
         logger-level: full
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [requestId=%X{requestId} tenantId=%X{tenantId} userId=%X{userId} conversationId=%X{conversationId}] %logger{36} - %msg%n"
   level:
     org.springframework.web.client: DEBUG
     org.springframework.ai.chat.client.advisor: DEBUG
