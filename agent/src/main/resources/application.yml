@@ -53,7 +53,23 @@ spring:
           #   username: root
           #   password: root
   ai:
+    openai:
+      chat:
+        api-key: ${OPENAI_API_KEY2}
+        base-url: ${OPENAI_BASE_URL2}
+        options:
+          model: glm-5
+      #          model: deepseek-v4-pro
+      embedding:
+        api-key: ${OPENAI_API_KEY2}
+        base-url: https://api.modelarts-maas.com/v1
+        options:
+          model: bge-m3
     chat:
+      observations:
+        log-prompt: false
+        log-completion: false
+        include-error-logging: true
       client:
         tool-search-advisor:
           # 关闭官方全局自动注入，改为在每个 Agent 上手动挂载自己的 ToolSearchAdvisor。
@@ -64,18 +80,7 @@ spring:
           # 多个 Agent 可以共用这个 collection，但必须使用不同 toolSetId 做 metadata 隔离。
           milvus:
             collection-name: tool_data
-    openai:
-      chat:
-        api-key: ${OPENAI_API_KEY2}
-        base-url: ${OPENAI_BASE_URL2}
-        options:
-          model: glm-5
-#          model: deepseek-v4-pro
-      embedding:
-        api-key: ${OPENAI_API_KEY2}
-        base-url: https://api.modelarts-maas.com/v1
-        options:
-          model: bge-m3
+
     vectorstore:
       milvus:
         client:
@@ -123,3 +128,12 @@ app:
       order:
         # 订单智能体的工具索引隔离 ID，只索引和检索订单相关工具。
         tool-set-id: order-agent-tools
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
