@@ -22,7 +22,7 @@ public class ToolSearchAdvisorConfig {
                                                              MilvusVectorStoreProperties milvusProperties,
                                                              ToolCallingManager toolCallingManager,
                                                              @Value("${spring.ai.chat.client.tool-search-advisor.milvus.collection-name:tool_data}") String toolCollectionName,
-                                                             @Value("${spring.ai.chat.client.tool-search-advisor.max-results:2}") Integer maxResults) {
+                                                             @Value("${spring.ai.chat.client.tool-search-advisor.max-results:5}") Integer maxResults) {
         // 工具检索和业务知识库使用不同 collection，避免 RAG 检索到工具说明文本。
         // 这里不额外注册 VectorStore Bean，防止影响业务侧默认 VectorStore 自动装配。
         // 构造工具检索专用 Milvus 向量库，多个 Agent 可以共用同一个 collection。
