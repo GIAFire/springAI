@@ -1,8 +1,12 @@
 package com.example.agent.agent.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AiCallAuditEvent {
     private String requestId;
     private String tenantId;
@@ -14,9 +18,6 @@ public class AiCallAuditEvent {
     private Integer promptTokens;
     private Integer completionTokens;
     private Integer totalTokens;
-
     private String errorType;
 
-    public AiCallAuditEvent(String requestId, String tenantId, String userId, String conversationId, String responseModel, String success, long costMs, Integer promptTokens, Integer completionTokens, Integer totalTokens, Object o) {
-    }
 }

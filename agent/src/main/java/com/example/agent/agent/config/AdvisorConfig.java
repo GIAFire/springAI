@@ -1,6 +1,6 @@
 package com.example.agent.agent.config;
 
-import com.example.agent.agent.rag.advisors.AuditMetricsAdvisor;
+import com.example.agent.agent.rag.advisors.AuditAdvisor;
 import com.example.agent.agent.rag.advisors.TraceMetricsAdvisor;
 import com.example.agent.agent.service.CallAuditSink;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -26,7 +26,7 @@ public class AdvisorConfig {
     }
 
     @Bean
-    public AuditMetricsAdvisor auditMetricsAdvisor(MeterRegistry meterRegistry){
-        return new AuditMetricsAdvisor(meterRegistry,callAuditSink);
+    public AuditAdvisor auditMetricsAdvisor(){
+        return new AuditAdvisor(callAuditSink);
     }
 }

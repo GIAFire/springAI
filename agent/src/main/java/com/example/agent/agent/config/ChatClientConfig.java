@@ -1,6 +1,6 @@
 package com.example.agent.agent.config;
 
-import com.example.agent.agent.rag.advisors.AuditMetricsAdvisor;
+import com.example.agent.agent.rag.advisors.AuditAdvisor;
 import com.example.agent.agent.rag.advisors.TraceMetricsAdvisor;
 import com.example.agent.agent.tools.MallAdminRoleTools;
 import com.example.agent.agent.tools.MallAdminUserTools;
@@ -31,7 +31,7 @@ public class ChatClientConfig {
     @Autowired
     private TraceMetricsAdvisor traceMetricsAdvisor;
     @Autowired
-    private AuditMetricsAdvisor auditMetricsAdvisor;
+    private AuditAdvisor auditAdvisor;
     private ChatClient.Builder baseAgentBuilder(ChatClient.Builder builder) {
         // 设置上下文最大记录
         MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
@@ -39,7 +39,7 @@ public class ChatClientConfig {
                 // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build())
                 .defaultAdvisors(traceMetricsAdvisor)
-                .defaultAdvisors(auditMetricsAdvisor);
+                .defaultAdvisors(auditAdvisor);
     }
 
     @Bean
