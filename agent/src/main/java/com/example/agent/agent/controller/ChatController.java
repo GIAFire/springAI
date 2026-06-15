@@ -1,6 +1,5 @@
 package com.example.agent.agent.controller;
 
-import com.example.agent.agent.rag.advisors.TestAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class ChatController {
         return agentClient.prompt()
                 .user(msg)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-                .advisors(new TestAdvisor())
+                .advisors()
                 .call()
                 .content();
     }

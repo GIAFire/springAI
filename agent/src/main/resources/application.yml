@@ -67,8 +67,8 @@ spring:
           model: bge-m3
     chat:
       observations:
-        log-prompt: false
-        log-completion: false
+        log-prompt: true
+        log-completion: true
         include-error-logging: true
       client:
         tool-search-advisor:
