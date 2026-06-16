@@ -49,7 +49,7 @@ public class TraceMetricsAdvisor implements CallAdvisor, StreamAdvisor {
      *   <li>处理异常情况并记录错误指标</li>
      * </ul>
      *
-     * @param request AI 聊天客户端请求对象，包含提示词、选项和上下文
+     * @param chatClientRequest AI 聊天客户端请求对象，包含提示词、选项和上下文
      * @param chain   顾问责任链，用于继续执行后续的处理逻辑
      * @return AI 聊天客户端响应对象，包含完整的响应数据
      */

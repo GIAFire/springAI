@@ -38,9 +38,7 @@ public class RequestMdcFilter extends OncePerRequestFilter {
                 request.getHeader("X-Tenant-Id"),
                 "default");
 
-        String conversationId = firstNonBlank(
-                request.getHeader("X-Conversation-Id"),
-                UUID.randomUUID().toString());
+        String conversationId = request.getHeader("X-Conversation-Id");
 
         String userId = firstNonBlank(
                 resolveUserId(),

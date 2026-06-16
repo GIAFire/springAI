@@ -14,7 +14,7 @@ public class LoggingAiCallAuditSink implements CallAuditSink {
     @Override
     public void publish(AiCallAuditEvent event) {
         log.info(
-                "AuditMetricsAdvisor. requestId={}, tenantId={}, userId={}, conversationId={}, model={}, status={}, costMs={}, promptTokens={}, completionTokens={}, totalTokens={}, errorType={}",
+                "AuditAdvisor. requestId={}, tenantId={}, userId={}, conversationId={}, model={}, status={}, costMs={}, promptTokens={}, completionTokens={}, totalTokens={}, errorType={}",
                 event.getRequestId(),
                 event.getTenantId(),
                 event.getUserId(),
