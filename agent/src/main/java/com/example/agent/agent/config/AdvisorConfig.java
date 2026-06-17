@@ -1,9 +1,12 @@
 package com.example.agent.agent.config;
 
+import com.example.agent.agent.config.redis.RedisChatMemoryRepository;
 import com.example.agent.agent.rag.advisors.AuditAdvisor;
 import com.example.agent.agent.rag.advisors.TraceMetricsAdvisor;
 import com.example.agent.agent.service.CallAuditSink;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -28,5 +31,13 @@ public class AdvisorConfig {
     @Bean
     public AuditAdvisor auditMetricsAdvisor(){
         return new AuditAdvisor(callAuditSink);
+    }
+
+    @Bean
+    public ChatMemory chatMemory(RedisChatMemoryRepository repository) {
+        return MessageWindowChatMemory.builder()
+                .chatMemoryRepository(repository)
+                .maxMessages(500)
+                .build();
     }
 }

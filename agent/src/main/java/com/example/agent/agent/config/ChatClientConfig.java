@@ -7,6 +7,7 @@ import com.example.agent.agent.tools.MallAdminUserTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.tool.ToolCallback;
@@ -32,12 +33,14 @@ public class ChatClientConfig {
     private TraceMetricsAdvisor traceMetricsAdvisor;
     @Autowired
     private AuditAdvisor auditAdvisor;
+    @Autowired
+    private ChatMemory chatMemory;
     private ChatClient.Builder baseAgentBuilder(ChatClient.Builder builder) {
         // 设置上下文最大记录
-        MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
+//        MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
         return builder.clone()
                 // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageBuild).build())
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .defaultAdvisors(traceMetricsAdvisor)
                 .defaultAdvisors(auditAdvisor);
     }
