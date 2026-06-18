@@ -1,4 +1,4 @@
-package com.example.agent.agent.config.redis;
+package com.example.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;

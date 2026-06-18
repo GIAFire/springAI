@@ -1,17 +1,18 @@
 package com.example.agent.agent.config;
 
+import com.example.agent.agent.config.tool.ToolSearchAdvisorFactory;
 import com.example.agent.agent.rag.advisors.AuditAdvisor;
 import com.example.agent.agent.rag.advisors.TraceMetricsAdvisor;
 import com.example.agent.agent.tools.MallAdminRoleTools;
 import com.example.agent.agent.tools.MallAdminUserTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.definition.ToolDefinition;
@@ -35,14 +36,17 @@ public class ChatClientConfig {
     private AuditAdvisor auditAdvisor;
     @Autowired
     private ChatMemory chatMemory;
+    @Autowired
+    private SafeGuardAdvisor safeGuardAdvisor;
     private ChatClient.Builder baseAgentBuilder(ChatClient.Builder builder) {
         // 设置上下文最大记录
 //        MessageWindowChatMemory messageBuild = MessageWindowChatMemory.builder().maxMessages(1000).build();
         return builder.clone()
                 // !!!最重要 请求拦截器,每次请求时从外部获取数据,添加到上下文.如知识库,搜索结果,会话记忆等
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .defaultAdvisors(traceMetricsAdvisor)
-                .defaultAdvisors(auditAdvisor);
+//                .defaultAdvisors(safeGuardAdvisor)
+                .defaultAdvisors(auditAdvisor)
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build());
     }
 
     @Bean

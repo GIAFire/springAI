@@ -1,4 +1,4 @@
-package com.example.agent.agent.config;
+package com.example.agent.agent.config.tool;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

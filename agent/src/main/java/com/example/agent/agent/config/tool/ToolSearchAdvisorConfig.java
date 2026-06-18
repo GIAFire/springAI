@@ -1,4 +1,4 @@
-package com.example.agent.agent.config;
+package com.example.agent.agent.config.tool;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.IndexType;

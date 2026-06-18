@@ -1,5 +1,6 @@
 package com.example.agent.agent.config.redis;
 
+import com.example.redis.RedisService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
